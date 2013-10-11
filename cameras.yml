@@ -1,8 +1,8 @@
-- full_url: rtsp://nw.dc.cameras.farm/live/ch00_0
-  tile_url: rtsp://nw.dc.cameras.farm/live/ch01_0
-- full_url: rtsp://sw.dc.cameras.farm/live/ch00_0
-  tile_url: rtsp://sw.dc.cameras.farm/live/ch01_0
-- full_url: rtsp://se.dc.cameras.farm/live/ch00_0
-  tile_url: rtsp://se.dc.cameras.farm/live/ch01_0
-- full_url: rtsp://ne.dc.cameras.farm/live/ch00_0
-  tile_url: rtsp://ne.dc.cameras.farm/live/ch01_0
+- full_url: rtsp://nw-cam.dc.farm/live/ch00_0
+  tile_url: rtsp://nw-cam.dc.farm/live/ch01_0
+- full_url: rtsp://sw-cam.dc.farm/live/ch00_0
+  tile_url: rtsp://sw-cam.dc.farm/live/ch01_0
+- full_url: rtsp://se-cam.dc.farm/live/ch00_0
+  tile_url: rtsp://se-cam.dc.farm/live/ch01_0
+- full_url: rtsp://ne-cam.dc.farm/live/ch00_0
+  tile_url: rtsp://ne-cam.dc.farm/live/ch01_0
