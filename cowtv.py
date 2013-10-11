@@ -1,16 +1,35 @@
+import os
+import sys
+import time 
 import yaml
 import pylirc
 import select
 import logging
 import subprocess
-from socketIO_client import SocketIO
+import socketIO_client
+import requests.exceptions
+
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 
 log = logging.getLogger("CowHD")
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 
-socketIO = SocketIO("localhost", 8888)
+class LightsNamespace(socketIO_client.BaseNamespace):
+
+    def on_connect(self):
+        log.debug("Lights connected")
+    
+    def on_disconnect(self):
+        log.debug("Lights disconnected")
+    
+try:
+    socketIO = socketIO_client.SocketIO("172.70.22.5", 8888)
+except requests.exceptions.ConnectionError:
+    print "Could not connect to lights server"
+    exit(0)
+
+lightsNamespace = socketIO.define(LightsNamespace)
 
 def dc_lights_update(status):
     log.info("dc_lights_update: " + str(status))
@@ -18,9 +37,11 @@ def dc_lights_update(status):
 socketIO.on('dc_lights', dc_lights_update)
 
 def keep_alive():
-    log.debug("Received keep_alive")
+    pass
+    #log.debug("Received keep_alive")
 
 socketIO.on("keep_alive", keep_alive)
+
 
 class CowHdController(object):
 
@@ -49,10 +70,13 @@ class CowHdController(object):
             return
         self.stop()
         self.cameras[number].start_full()
+        
 
     def stop(self):
         for camera in self.cameras:
             camera.stop()
+        time.sleep(1)
+        os.system("killall omxplayer.bin");
 
 class CameraView(object):
     width = 1920
@@ -106,33 +130,51 @@ def main():
 
     pylirc_socket = pylirc.init("cowtv", "~/.lircrc", False)
     while(True):
-        select.select([pylirc_socket],[],[])
-        codes = pylirc.nextcode(1)
-        #if not codes:
-        #    log.warn("None code")
-        #    continue
-        log.info("Got codes: " + str(codes))
-        if not codes:
-            continue
-        for code in codes:
-            command = code["config"]
-            log.info("Got command: " + str(command))
-            if command == "SELECT":
-                log.info("Toggling Lights")
-                socketIO.emit("toggle_lights")
-#            elif command == "TOGGLE_LIGHTS":
-#                socketIO.emit("toggle_lights")
-            elif command == "CLEAR":
-                controller.stop()
-            else:
-                try:
-                    cam_number = int(command)
-                except ValueError:
-                    log.warn("Unreconized IR command: " + command)
+        (iready, oready, eready) = select.select([sys.stdin, pylirc_socket],[],[])
+        for s in iready:
+            if s == sys.stdin:
+                line = sys.stdin.readline()
+                line = line.strip()
+                if line == 't':
+                    log.info("Toggling Lights")
+                    socketIO.emit("toggle_lights")
                 else:
-                    if cam_number == 0:
-                        controller.show_all_cameras()
+                    try:
+                        cam_number = int(line)
+                    except ValueError:
+                        log.warn("Unreconized command: " + line)
                     else:
-                        controller.show_camera(cam_number)
+                        if cam_number == 0:
+                            controller.show_all_cameras()
+                        else:
+                            controller.show_camera(cam_number)
+            elif s == pylirc_socket:
+                codes = pylirc.nextcode(1)
+                #if not codes:
+                #    log.warn("None code")
+                #    continue
+                log.info("Got codes: " + str(codes))
+                if not codes:
+                    continue
+                for code in codes:
+                    command = code["config"]
+                    log.info("Got command: " + str(command))
+                    if command == "SELECT":
+                        log.info("Toggling Lights")
+                        socketIO.emit("toggle_lights")
+#                    elif command == "TOGGLE_LIGHTS":
+#                        socketIO.emit("toggle_lights")
+                    elif command == "CLEAR":
+                        controller.stop()
+                    else:
+                        try:
+                            cam_number = int(command)
+                        except ValueError:
+                            log.warn("Unreconized IR command: " + command)
+                        else:
+                            if cam_number == 0:
+                                controller.show_all_cameras()
+                            else:
+                                controller.show_camera(int(command))
 
 main()
