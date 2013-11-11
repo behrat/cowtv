@@ -1,0 +1,30 @@
+begin
+    prog    = cowtv
+    button    = KEY_0
+    config    = 0
+end
+begin
+    prog    = cowtv
+    button    = KEY_1
+    config    = 1
+end
+begin
+    prog    = cowtv
+    button    = KEY_2
+    config    = 2
+end
+begin
+    prog    = cowtv
+    button    = KEY_3
+    config    = 3
+end
+begin
+    prog    = cowtv
+    button    = KEY_4
+    config    = 4
+end
+begin
+    prog    = cowtv
+    button    = KEY_SELECT
+    config    = SELECT
+end
