@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 import time 
@@ -6,48 +8,34 @@ import pylirc
 import select
 import logging
 import subprocess
-import socketIO_client
-import requests.exceptions
+from socketIO_client import SocketIO
 
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 
 log = logging.getLogger("CowHD")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
-class LightsNamespace(socketIO_client.BaseNamespace):
+config_file = open('/etc/cowtv/cowtv.yml')
+cowtv_config = yaml.load(config_file)
+config_file.close()
 
-    def on_connect(self):
-        log.debug("Lights connected")
-    
-    def on_disconnect(self):
-        log.debug("Lights disconnected")
-    
-try:
-    socketIO = socketIO_client.SocketIO("172.70.22.5", 8888)
-except requests.exceptions.ConnectionError:
-    print "Could not connect to lights server"
-    exit(0)
-
-lightsNamespace = socketIO.define(LightsNamespace)
+socketIO = None
 
 def dc_lights_update(status):
     log.info("dc_lights_update: " + str(status))
-
-socketIO.on('dc_lights', dc_lights_update)
-
 def keep_alive():
-    pass
-    #log.debug("Received keep_alive")
+    log.debug("Received keep_alive")
 
+socketIO = SocketIO(cowtv_config["weblights"], 8888)
+socketIO.on('dc_lights', dc_lights_update)
 socketIO.on("keep_alive", keep_alive)
-
 
 class CowHdController(object):
 
-    def __init__(self, config):
+    def __init__(self, cameras_config):
         self.cameras = []
-        for camera_config in config:
+        for camera_config in cameras_config:
             self.cameras.append(CameraView(**camera_config))
 
     def show_all_cameras(self):
@@ -114,21 +102,18 @@ class CameraView(object):
         try:
             self.player.stdin.write('q')
         except IOError, e:
-            self.log.warn(str(e))
+            log.warn(str(e))
         self.player = None
 
 def main():
     log.info("Starting")
-    config_file = open('cameras.yml')
-    cameras_config = yaml.load(config_file)
-    config_file.close()
-    
-    controller = CowHdController(cameras_config)
+
+    controller = CowHdController(cowtv_config["cameras"])
     
 #    Start wih all cameras
     controller.show_all_cameras()
 
-    pylirc_socket = pylirc.init("cowtv", "~/.lircrc", False)
+    pylirc_socket = pylirc.init("cowtv", "/etc/cowtv/lircrc", False)
     while(True):
         (iready, oready, eready) = select.select([sys.stdin, pylirc_socket],[],[])
         for s in iready:
