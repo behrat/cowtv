@@ -25,6 +25,31 @@ begin
 end
 begin
     prog    = cowtv
+    button    = KEY_5
+    config    = 5
+end
+begin
+    prog    = cowtv
+    button    = KEY_6
+    config    = 6
+end
+begin
+    prog    = cowtv
+    button    = KEY_7
+    config    = 7
+end
+begin
+    prog    = cowtv
+    button    = KEY_8
+    config    = 8
+end
+begin
+    prog    = cowtv
+    button    = KEY_9
+    config    = 9
+end
+begin
+    prog    = cowtv
     button    = KEY_SELECT
     config    = SELECT
 end
