@@ -34,26 +34,32 @@ socketIO.on("keep_alive", keep_alive)
 class CowHdController(object):
 
     def __init__(self, cameras_config):
-        self.cameras = []
+        self.cameras = {}
+        default_number = 1
         for camera_config in cameras_config:
-            self.cameras.append(CameraView(**camera_config))
+            camera = CameraView(**camera_config)
+            if 'number' in camera_config:
+                self.cameras[camera_config['number']] = camera
+            else:
+                while default_number in self.cameras:
+                    default_number += 1
+                self.cameras[default_number] = camera
 
     def show_all_cameras(self):
         self.stop()
         self._tile_cameras(2)
 
     def _tile_cameras(self, outof):
-        cam_number = 0
+        cam_number = 1
         for v_tile in range(outof):
             for h_tile in range(outof):
-                if cam_number >= len(self.cameras):
+                if cam_number not in self.cameras:
                     return
                 self.cameras[cam_number].start_tiled(h_tile, v_tile, outof)
                 cam_number += 1
 
     def show_camera(self, number):
-        number -= 1
-        if number >= len(self.cameras):
+        if number not in self.cameras:
             log.warn("Camera %d doesn't exist" % number)
             return
         self.stop()
@@ -61,7 +67,7 @@ class CowHdController(object):
         
 
     def stop(self):
-        for camera in self.cameras:
+        for (number, camera) in self.cameras.iteritems():
             camera.stop()
         time.sleep(1)
         os.system("killall omxplayer.bin");
@@ -70,9 +76,10 @@ class CameraView(object):
     width = 1920
     height = 1080
 
-    def __init__(self, full_url, tile_url):
+    def __init__(self, full_url, tile_url, number=None):
         self.full_url = full_url
         self.tile_url = tile_url
+
         self.player = None
 
     def is_playing(self):
