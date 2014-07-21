@@ -8,3 +8,6 @@ cameras:
     tile_url: rtsp://se-cam.dc.farm/live/ch01_0
   - full_url: rtsp://ne-cam.dc.farm/live/ch00_0
     tile_url: rtsp://ne-cam.dc.farm/live/ch01_0
+  - full_url: rtsp://ne-calving-cam.farm/0
+    tile_url: rtsp://ne-calving-cam.farm/1
+    number: 7
