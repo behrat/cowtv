@@ -153,6 +153,7 @@ def main():
                     log.info("Got command: " + str(command))
                     if command == "SELECT":
                         log.info("Toggling Lights")
+                        controller.show_all_cameras()
                         socketIO.emit("toggle_lights")
 #                    elif command == "TOGGLE_LIGHTS":
 #                        socketIO.emit("toggle_lights")
