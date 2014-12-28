@@ -8,10 +8,12 @@ import pylirc
 import select
 import logging
 import subprocess
-from socketIO_client import SocketIO
+import threading
+from socketIO_client import SocketIO, BaseNamespace
 
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
+logging.basicConfig(level=logging.DEBUG)
 
 log = logging.getLogger("CowHD")
 log.setLevel(logging.INFO)
@@ -20,16 +22,33 @@ config_file = open('/etc/cowtv/cowtv.yml')
 cowtv_config = yaml.load(config_file)
 config_file.close()
 
-socketIO = None
+class WebLights(threading.Thread):
+    class WebLightsNamespace(BaseNamespace):
+        def on_connect(self):
+            print '[Connected]'
+            log.info("Connected to weblights")
+    
+        def on_dc_lights(self, status):
+            log.info("dc_lights_update: " + str(status))
+        def on_keep_alive(self, *args):
+            log.debug("Received keep_alive")
 
-def dc_lights_update(status):
-    log.info("dc_lights_update: " + str(status))
-def keep_alive():
-    log.debug("Received keep_alive")
+    def run(self):
+        log.info("Starting weblights")
+        self.socketIO = SocketIO(
+                cowtv_config["weblights"],
+                Namespace=self.WebLightsNamespace)
+        self.socketIO.wait()
 
-socketIO = SocketIO(cowtv_config["weblights"], 8888)
-socketIO.on('dc_lights', dc_lights_update)
-socketIO.on("keep_alive", keep_alive)
+    def toggle(self):
+        self.socketIO.emit("toggle_lights")
+
+    def disconnect(self):
+        import pdb; pdb.set_trace()
+        self.socketIO.disconnect()
+
+weblights = WebLights()
+weblights.start()
 
 class CowHdController(object):
 
@@ -122,14 +141,20 @@ def main():
 
     pylirc_socket = pylirc.init("cowtv", "/etc/cowtv/lircrc", False)
     while(True):
-        (iready, oready, eready) = select.select([sys.stdin, pylirc_socket],[],[])
+        try:
+            (iready, oready, eready) = select.select([sys.stdin, pylirc_socket],[],[])
+        except KeyboardInterrupt:
+            log.info("Quitting")
+            weblights.disconnect()
+            break
+
         for s in iready:
             if s == sys.stdin:
                 line = sys.stdin.readline()
                 line = line.strip()
                 if line == 't':
                     log.info("Toggling Lights")
-                    socketIO.emit("toggle_lights")
+                    weblights.toggle()
                 else:
                     try:
                         cam_number = int(line)
@@ -154,7 +179,7 @@ def main():
                     if command == "SELECT":
                         log.info("Toggling Lights")
                         controller.show_all_cameras()
-                        socketIO.emit("toggle_lights")
+                        weblights.toggle()
 #                    elif command == "TOGGLE_LIGHTS":
 #                        socketIO.emit("toggle_lights")
                     elif command == "CLEAR":
