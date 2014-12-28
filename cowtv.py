@@ -44,7 +44,6 @@ class WebLights(threading.Thread):
         self.socketIO.emit("toggle_lights")
 
     def disconnect(self):
-        import pdb; pdb.set_trace()
         self.socketIO.disconnect()
 
 weblights = WebLights()
