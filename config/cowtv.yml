@@ -4,13 +4,13 @@ cameras:
     tile_url: rtsp://wm-dc-cam.ehrat.farm/1
   - full_url: rtsp://em-dc-cam.ehrat.farm/0
     tile_url: rtsp://em-dc-cam.ehrat.farm/1
-  - full_url: rtsp://ne-cam.dc.farm/live/ch00_0
-    tile_url: rtsp://ne-cam.dc.farm/live/ch01_0
-  - full_url: rtsp://nw-cam.dc.farm/live/ch00_0
-    tile_url: rtsp://nw-cam.dc.farm/live/ch01_0
-  - full_url: rtsp://se-cam.dc.farm/live/ch00_0
-    tile_url: rtsp://se-cam.dc.farm/live/ch01_0
-  - full_url: rtsp://sw-cam.dc.farm/live/ch00_0
-    tile_url: rtsp://sw-cam.dc.farm/live/ch01_0
-  - full_url: rtsp://ne-calving-cam.farm/0
-    tile_url: rtsp://ne-calving-cam.farm/1
+  - full_url: rtsp://ne-dc-cam.ehrat.farm/live/ch00_0
+    tile_url: rtsp://ne-dc-cam.ehrat.farm/live/ch01_0
+  - full_url: rtsp://nw-dc-cam.ehrat.farm/live/ch00_0
+    tile_url: rtsp://nw-dc-cam.ehrat.farm/live/ch01_0
+  - full_url: rtsp://se-dc-cam.ehrat.farm/live/ch00_0
+    tile_url: rtsp://se-dc-cam.ehrat.farm/live/ch01_0
+  - full_url: rtsp://sw-dc-cam.ehrat.farm/live/ch00_0
+    tile_url: rtsp://sw-dc-cam.ehrat.farm/live/ch01_0
+  - full_url: rtsp://ne-calving-cam.ehrat.farm/0
+    tile_url: rtsp://ne-calving-cam.ehrat.farm/1
